@@ -11,6 +11,8 @@ DEBUG = os.environ.get('DEBUG', 'on') == 'on'
 SECRET_KEY = os.environ.get('SECRET_KEY', '7lw_ujcsho&gbc)ixi#n+k(8zhbrr&2ijl_xqvi_p1o0i$li1g')
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
 
+BASE_DIR = os.path.dirname(__file__)
+
 settings.configure(
     DEBUG=DEBUG,
     SECRET_KEY=SECRET_KEY,
@@ -21,14 +23,26 @@ settings.configure(
         'django.middleware.csrf.CsrfViewMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
     ),
+    INSTALLED_APPS=(
+        'django.contrib.staticfiles',
+    ),
+    TEMPLATE_DIRS=(
+        os.path.join(BASE_DIR, 'templates'),
+    ),
+    STATICFILES_DIRS=(
+        os.path.join(BASE_DIR, 'static'),
+    ),
+    STATIC_URL='/static/',
 )
 
 
 from django import forms
 from django.conf.urls import url
 from django.core.cache import cache
+from django.core.urlresolvers import reverse
 from django.core.wsgi import get_wsgi_application
 from django.http import HttpResponse, HttpResponseBadRequest
+from django.shortcuts import render
 from django.views.decorators.http import etag
 
 from io import BytesIO
@@ -71,7 +85,7 @@ def generate_etag(request, width, height):
 
 @etag(generate_etag)
 def placeholder(request, width, height):
-    form = ImageForm({'height': height, 'widht': width})
+    form = ImageForm({'height': height, 'width': width})
     if form.is_valid():
         image = form.generate()
         return HttpResponse(image, content_type='image/png')
@@ -80,7 +94,11 @@ def placeholder(request, width, height):
 
 
 def index(request):
-    return HttpResponse('Hello World')
+    example = reverse('placeholder', kwargs={'width': 50, 'height': 50})
+    context = {
+        'example': request.build_absolute_uri(example)
+    }
+    return render(request, 'home.html', context)
 
 
 urlpatterns = (
