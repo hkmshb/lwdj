@@ -23,7 +23,10 @@ settings.configure(
         'sitebuilder',
     ),
     STATIC_URL='/static/',
-    SITE_PAGES_DIR=os.path.join(BASE_DIR, 'pages')
+    SITE_PAGES_DIR=os.path.join(BASE_DIR, 'pages'),
+    SITE_OUTPUT_DIR=os.path.join(BASE_DIR, '_build'),
+    STATIC_ROOT=os.path.join(BASE_DIR, '_build', 'static'),
+    STATICFILES_STORAGE='django.contrib.staticfiles.storage.CachedStaticFilesStorage',
 )
 
 
